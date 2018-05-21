@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<!-- xlsx.js (C) 2013-present  SheetJS http://sheetjs.com -->
+<!-- vim: set ts=2: -->
+<html><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>PennController Table Generator</title>
+<style>
+#mainContainer{
+    width: 40em;
+    margin: auto;
+}
+#drop{
+    border:2px dashed #bbb;
+    -moz-border-radius:5px;
+    -webkit-border-radius:5px;
+    border-radius:5px;
+    padding:25px;
+    text-align:center;
+    font:20pt bold,"Vollkorn";color:#bbb
+}
+#b64data{
+    width:100%;
+}
+a { text-decoration: none }
+</style>
+</head>
+<body>
+
+<div id='mainContainer'>
+  
+<p style="font-weight: bold;">Use this page to convert your CSV file in a <a href="https://osf.io/e8npk/wiki/home/" target="_blank">PennController</a>-friendly format.</p>
+
+<p style="font-weight: bold;">Instructions</p>
+ <ol>
+  <li>Drop your CSV file into the field below, or click on <em>Browse...</em> to select it from you computer.</li>
+  <li>Your browswer should prompt you to download the automatically generated <em>.js</em> file. <br>
+    If not, copy-paste the text form the field below in a text editor and save it as a <em>.js</em> file.</li>
+  <li>Upload the <em>.js</em> file in the <em>data_includes</em> subfolder of your IBEX experiment.</li>
+ </ol>
+  
+<div id="drop">Drop a CSV file here</div>
+<input name="xlfile" id="xlf" onchange="openFile(event)" type="file"> ... or click here to select a file
+
+<p>
+  If you did not download the file, copy-paste the text below in a text editor and save it as a <em>.js</em> file:<br>
+    <textarea id="output" rows="25" cols="80"></textarea>
+</p>
+
+</div>
+
+<script>
+
+function download(filename, text) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
+var output = document.getElementById('output');
+function readFile(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var text = e.target.result.replace(/\n/g,"\\n")
+                                  .replace(/\r/g,"\\r")
+                                  .replace(/"/g,"\\\"");
+        text = "PennController.AddTable(\""+file.name+"\", \""+text+"\");";
+        download("_table-"+file.name+".js", text);
+        output.innerText = text;
+    };
+    reader.readAsText(file);
+}
+
+function openFile(event) {
+    readFile(event.target.files[0])
+}
+ 
+var drop = document.getElementById('drop');
+function handleDrop(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    var files = e.dataTransfer.files;
+    var i,f;
+    for (i = 0, f = files[i]; i != files.length; ++i) {
+        readFile(f);
+    }
+}
+ 
+function handleDragover(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+}
+ 
+if(drop.addEventListener) {
+    drop.addEventListener('dragenter', handleDragover, false);
+    drop.addEventListener('dragover', handleDragover, false);
+    drop.addEventListener('drop', handleDrop, false);
+}
+
+
+</script>
+
+</body></html>
